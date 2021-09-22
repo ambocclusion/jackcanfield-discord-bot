@@ -118,37 +118,6 @@ async def foodReviewerPick(message):
     except Exception as e:
         print(traceback.format_exc())
 
-async def foodReviewerCheck(message):
-    if len(message.content) == 0:
-        return
-    try:
-        if len(imageMetadata['datas']) == 0:
-            return
-        foundImages = []
-        messageContent = message.content.lower()
-        for image in imageMetadata['datas']:
-            ratio = textdistance.jaccard(messageContent, image['words'])
-            for word in messageContent.split():
-                for content in image['words']:
-                    if textdistance.jaccard(word, content) > config['matchingWordThreshold']:
-                        ratio += config['matchingWordBonus']
-            if ratio > 1.0: ratio = 1.0
-            if ratio < 0.0: ratio = 0.0
-            foundImages.append({'im' : image, 'chance' : ratio})
-        if len(foundImages) != 0:
-            highest = max(foundImages, key=lambda item: item['chance'])
-            print(str(highest['chance']) + highest['im']['words'])
-            chance = highest['chance'] * (random.random() * config['randomChance'])
-            print(chance)
-            if chance > config['foodReviewerChance'] or highest['chance'] >= config['detectionRate']:
-                pickedImage = highest
-                filepath = config['pictureDownloadFolder'] + '/' + pickedImage['im']['id'] + '.png'
-                reviewerPic = open(filepath, 'rb')
-                file = discord.File(fp=reviewerPic)
-                await message.channel.send(file=file)
-    except Exception as e:
-        print(e)
-
 def GetAllPlaylistItems():
     url = config['playlistUrl']
     query = parse_qs(urlparse(url).query, keep_blank_values=True)
