@@ -1,0 +1,11 @@
+.idea/*
+media/*
+downloads/*
+venv/*
+output/*
+
+config.json
+log.json
+imageMetaData.json
+
+!*/filesgohere

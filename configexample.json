@@ -1,0 +1,32 @@
+{
+	"botId":"QWERTY1234567890",
+	"videopath":"./media/jackvid.mp4",
+	"quoteFile":"./media/quotes.json",
+	"quoteBg":"./media/jackspiration.png",
+	"welcomeFile":"./media/welcome.json",
+	"welcomeBg":"./media/jackwelcome.jpg",
+
+	"publicChannel":12345678901234567890,
+	"pictureScanChannel": 12345678901234567890,
+
+	"quoteFont":"./media/seguihis.ttf",
+	"outputjackquoteimg":"output/outputjackimg.png",
+
+	"welcomeFont":"./media/seguihis.ttf",
+	"welcomeChannel":12345678901234567890,
+	"outputWelcomeImg":"output/outputjackimg.png",
+
+	"youtubeApiKey":"QWERTY1234567890",
+	"playlistUrl":"https://www.youtube.com/playlist?list=PLnlP5W4rwnlX_OANrNp1K6hzEzbNT-oke",
+
+	"ultimateChannel":12345678901234567890,
+	"hotdadId":"186575135354912768",
+
+	"pictureDownloadFolder": "downloads",
+	"foodReviewerChance": 0.75,
+	"detectionRate" : 0.85,
+	"matchingWordThreshold" : 0.9,
+	"matchingWordBonus" : 0.01,
+	"randomVariation" : 0.1,
+	"randomChance" : 0.5
+}
