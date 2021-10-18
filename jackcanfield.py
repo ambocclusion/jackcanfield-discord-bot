@@ -92,26 +92,39 @@ async def foodReviewerPick(message):
         for image in imageMetadata['datas']:
             matches = 0
             for word in set(filtered_sentence):
-                foundWords = image['words']
-                foundWord_tokens = nltk.wordpunct_tokenize(foundWords)
-                for imageword in set(foundWord_tokens):
-                    if textdistance.jaccard(word, imageword) >= 0.5:
-                        matches += 1
-                    if textdistance.jaccard(word, imageword) >= 0.8:
-                        matches += 1
-                    if textdistance.jaccard(word, imageword) == 1:
-                        matches += 1
+                try:
+                    foundWords = image['words']
+                    foundWord_tokens = nltk.wordpunct_tokenize(foundWords)
+                    for imageword in set(foundWord_tokens):
+                        if textdistance.jaccard(word, imageword) >= 0.5:
+                            matches += 1
+                        if textdistance.jaccard(word, imageword) >= 0.8:
+                            matches += 1
+                        if textdistance.jaccard(word, imageword) == 1:
+                            matches += 1
+                        if matches >= 1:
+                            break
+                except:
+                    print(traceback.format_exc())
             matchlist.append({'image' : image, 'matches' : matches})
+        matchlist = [m for m in matchlist if 'words' in m['image']]
         matchlist.sort(key=lambda m: m['matches'])
         if len(matchlist) > 0:
             if matchlist[-1]['matches'] != 0:
-                selections = [match for match in matchlist if match['matches'] > math.floor(matchlist[-1]['matches'] * 0.7) or match['matches'] == matchlist[-1]['matches']]
+                selections = [match for match in matchlist if match['matches'] > math.floor(matchlist[-1]['matches'] * 0.5) or match['matches'] == matchlist[-1]['matches']]
             else:
                 selections = [match for match in matchlist if not match['image']['words']]
-            selection = random.choice(selections)
-            filepath = config['pictureDownloadFolder'] + '/' + selection['image']['id'] + '.png'
-            reviewerPic = open(filepath, 'rb')
-            file = discord.File(fp=reviewerPic)
+            retryCounter = 0
+            while retryCounter < 4:
+                try:
+                    selection = random.choice(selections)
+                    filepath = config['pictureDownloadFolder'] + '/' + selection['image']['id'] + '.png'
+                    reviewerPic = open(filepath, 'rb')
+                    file = discord.File(fp=reviewerPic)
+                    break
+                except:
+                    retryCounter += 1
+                    print(traceback.format_exc())
             #await message.channel.send(file=file)
             await message.reply(file=file)
             print('text: ' + ' '.join(filtered_sentence) + ' | words: ' +selection['image']['words'] + ' | matches: ' + str(selection['matches']) + ' | amount ' + str(len(selections)))
