@@ -363,6 +363,14 @@ try:
 except:
     imageMetadata = {'datas':[]}
 
+@client.event
+async def on_message(message):
+    text = "Bob Odenkirk" 
+    if message.author == client.user:
+        return
+    if text.lower() in message.content.lower():
+        await message.channel.send("bob odenkirk died from fucking the cholula fleshlight")
+
 nltk.download('words')
 nltk.download('brown')
 nltk.download('stopwords')
