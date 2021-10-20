@@ -270,8 +270,6 @@ async def on_message(message):
     messageContent = message.content.lower()
     
     text = "Bob Odenkirk" 
-    if message.author == client.user:
-        return
     if text.lower() in message.content.lower():
         await message.channel.send("bob odenkirk died from fucking the cholula fleshlight")
 
