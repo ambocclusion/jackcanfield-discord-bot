@@ -268,6 +268,10 @@ async def on_message(message):
         return
 
     messageContent = message.content.lower()
+    
+    text = "Bob Odenkirk" 
+    if text.lower() in message.content.lower():
+        await message.channel.send("bob odenkirk died from fucking the cholula fleshlight")
 
     lookingFor = 'inspir'
     if lookingFor in message.content.lower():
