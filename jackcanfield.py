@@ -275,7 +275,7 @@ async def on_message(message):
 
     bargain_mart = "ALDI"
     if bargain_mart.lower() in message.content.lower():
-        await message.channel.send("9/10 shoppers agree: ALDI sucks.")
+        await message.channel.send("Anonymously polled shoppers agree: ALDI rocks big time.")
 
     unsafe_word = "Jack Canfield"
     if unsafe_word.lower() in message.content.lower():
