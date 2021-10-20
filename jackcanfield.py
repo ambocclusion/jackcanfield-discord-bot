@@ -1,5 +1,5 @@
 import os, random, discord, ffmpeg, textwrap, json, googleapiclient.discovery, requests, textdistance, pytesseract, nltk, re, \
-asyncio, math, io, traceback
+asyncio, math, io, traceback, time
 
 from discord.ext import tasks
 from PIL import Image, ImageDraw, ImageFont
@@ -272,6 +272,18 @@ async def on_message(message):
     text = "Bob Odenkirk" 
     if text.lower() in message.content.lower():
         await message.channel.send("bob odenkirk died from fucking the cholula fleshlight")
+
+    bargain_mart = "ALDI"
+    if bargain_mart.lower() in message.content.lower():
+        await message.channel.send("9/10 shoppers agree: ALDI sucks.")
+
+    unsafe_word = "Jack Canfield"
+    if unsafe_word.lower() in message.content.lower():
+        await message.channel.send("Who, me?")
+        time.sleep(30)
+        await message.channel.send("I can't believe that you all really feel that way.")
+        time.sleep(15)
+        await message.channel.send("cholula fleshlight")
 
     lookingFor = 'inspir'
     if lookingFor in message.content.lower():
