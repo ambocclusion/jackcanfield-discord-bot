@@ -280,10 +280,6 @@ async def on_message(message):
     unsafe_word = "Jack Canfield"
     if unsafe_word.lower() in message.content.lower():
         await message.channel.send("Who, me?")
-        time.sleep(30)
-        await message.channel.send("I can't believe that you all really feel that way.")
-        time.sleep(15)
-        await message.channel.send("cholula fleshlight")
 
     lookingFor = 'inspir'
     if lookingFor in message.content.lower():
