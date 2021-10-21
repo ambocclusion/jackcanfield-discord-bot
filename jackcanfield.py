@@ -218,7 +218,12 @@ async def newMember(member):
 
 @client.event
 async def on_member_join(member):
-    await newMember(member)
+    await newMember(member)                     
+
+async def on_ready():
+    print("bot online")
+    channel = client.get_channel(config['ultimateChannel'])
+    await channel.send("baby the big man's up")
 
 async def sendQuote(channel, text, user):
     try:
@@ -269,8 +274,8 @@ async def on_message(message):
 
     messageContent = message.content.lower()
     
-    text = "Bob Odenkirk" 
-    if text.lower() in message.content.lower():
+    bob = "Odenkirk" 
+    if bob.lower() in message.content.lower():
         await message.channel.send("bob odenkirk died from fucking the cholula fleshlight")
 
     bargain_mart = "ALDI"
