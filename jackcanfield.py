@@ -220,6 +220,7 @@ async def newMember(member):
 async def on_member_join(member):
     await newMember(member)                     
 
+@client.event
 async def on_ready():
     print("bot online")
     channel = client.get_channel(config['ultimateChannel'])
