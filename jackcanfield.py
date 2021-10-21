@@ -1,5 +1,5 @@
 import os, random, discord, ffmpeg, textwrap, json, googleapiclient.discovery, requests, textdistance, pytesseract, nltk, re, \
-asyncio, math, io, traceback
+asyncio, math, io, traceback, time
 
 from discord.ext import tasks
 from PIL import Image, ImageDraw, ImageFont
@@ -218,7 +218,12 @@ async def newMember(member):
 
 @client.event
 async def on_member_join(member):
-    await newMember(member)
+    await newMember(member)                     
+
+async def on_ready():
+    print("bot online")
+    channel = client.get_channel(387053925850939398)
+    await channel.send("baby the big man's up")
 
 async def sendQuote(channel, text, user):
     try:
@@ -269,9 +274,17 @@ async def on_message(message):
 
     messageContent = message.content.lower()
     
-    text = "Bob Odenkirk" 
-    if text.lower() in message.content.lower():
+    bob = "Odenkirk" 
+    if bob.lower() in message.content.lower():
         await message.channel.send("bob odenkirk died from fucking the cholula fleshlight")
+
+    bargain_mart = "ALDI"
+    if bargain_mart.lower() in message.content.lower():
+        await message.channel.send("Anonymously polled shoppers agree: ALDI rocks big time.")
+
+    unsafe_word = "Jack Canfield"
+    if unsafe_word.lower() in message.content.lower():
+        await message.channel.send("Who, me?")
 
     lookingFor = 'inspir'
     if lookingFor in message.content.lower():
