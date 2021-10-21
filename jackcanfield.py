@@ -222,7 +222,7 @@ async def on_member_join(member):
 
 async def on_ready():
     print("bot online")
-    channel = client.get_channel(387053925850939398)
+    channel = config['ultimateChannel']
     await channel.send("baby the big man's up")
 
 async def sendQuote(channel, text, user):
