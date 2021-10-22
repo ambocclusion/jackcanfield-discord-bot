@@ -91,21 +91,22 @@ async def foodReviewerPick(message):
         filtered_sentence = set([w for w in word_tokens if not w.lower() in stop_words])
         for image in imageMetadata['datas']:
             matches = 0
+            #For each input word, find best matching word in image
             for word in set(filtered_sentence):
+                bestMatch = 0
                 try:
                     foundWords = image['words']
                     foundWord_tokens = nltk.wordpunct_tokenize(foundWords)
                     for imageword in set(foundWord_tokens):
                         if textdistance.jaccard(word, imageword) >= 0.5:
-                            matches += 1
+                            bestMatch += 0.5
                         if textdistance.jaccard(word, imageword) >= 0.8:
-                            matches += 1
+                            bestMatch += 0.8
                         if textdistance.jaccard(word, imageword) == 1:
-                            matches += 1
-                        if matches >= 1:
-                            break
+                            bestMatch += 1
                 except:
                     print(traceback.format_exc())
+                matches += bestMatch
             matchlist.append({'image' : image, 'matches' : matches})
         matchlist = [m for m in matchlist if 'words' in m['image']]
         matchlist.sort(key=lambda m: m['matches'])
