@@ -15,13 +15,25 @@ log = {}
 config = {}
 state = {}
 imageMetadata = {'datas':[]}
+copyPastaData = {'copyPastas':[]}
 
 configfile = 'config.json'
 imageDataFile = 'imageMetaData.json'
+copypastaFile = 'copypasta.json'
 
 intents = discord.Intents.default()
 intents.members = True
 client = discord.Client(intents=intents)
+
+async def postCopypasta(message):
+    randomChoice = random.choice(copyPastaData['copyPastas'])
+    await message.reply(randomChoice)
+
+async def addCopyPasta(message):
+    pastaString = message.content.replace('!addcopypasta', '')
+    copyPastaData['copyPastas'].append(pastaString)
+    await message.reply('added, baby!')
+    writeCopyPasta()
 
 async def scanImage(filename):
     print('scanning')
@@ -277,19 +289,23 @@ async def on_message(message):
     messageContent = message.content.lower()
     
     bob = "Odenkirk" 
-    if bob.lower() in message.content.lower():
+    if bob.lower() in messageContent:
         await message.channel.send("bob odenkirk died from fucking the cholula fleshlight")
 
     bargain_mart = "ALDI"
-    if bargain_mart.lower() in message.content.lower():
+    if bargain_mart.lower() in messageContent:
         await message.channel.send("Anonymously polled shoppers agree: ALDI rocks big time.")
 
     unsafe_word = "Jack Canfield"
-    if unsafe_word.lower() in message.content.lower():
+    if unsafe_word.lower() in messageContent:
         await message.channel.send("Who, me?")
 
+    copyPastaPrompt = 'gimme the pasta'
+    if copyPastaPrompt.lower() in messageContent:
+        await postCopypasta(message)
+
     lookingFor = 'inspir'
-    if lookingFor in message.content.lower():
+    if lookingFor in messageContent:
         await sendMessage(message.channel)
 
     amos = 'amos'
@@ -309,7 +325,7 @@ async def on_message(message):
     testing_role_ids = [role.name.lower() for role in message.author.roles]
     if 'mod mania' in testing_role_ids:
         newMemberLook = '!newmember'
-        if newMemberLook in message.content.lower():
+        if newMemberLook in messageContent:
             print('new member test')
             member = message.content.split(' ', 2)
             if len(member) == 1:
@@ -317,7 +333,7 @@ async def on_message(message):
             else:
                 await doNewMember(member[1])
         songLook = '!songoftheday'
-        if songLook in message.content.lower():
+        if songLook in messageContent:
             print('song test')
             search = message.content.split(' ', 2)
             if len(search) == 1:
@@ -326,15 +342,18 @@ async def on_message(message):
             else:
                 await doSongOfTheDay(search[1])
         scanLook = '!scan'
-        if scanLook in message.content.lower():
+        if scanLook in messageContent:
             force = False
-            if 'force' in message.content.lower(): force = True
+            if 'force' in messageContent: force = True
             asyncio.get_event_loop().create_task(scanPictures(True, force))
         localScanLook = '!localscan'
-        if localScanLook in message.content.lower():
+        if localScanLook in messageContent:
             force = False
-            if 'force' in message.content.lower(): force = True
+            if 'force' in messageContent: force = True
             asyncio.get_event_loop().create_task(scanPictures(False, force))
+        addQuote = '!addcopypasta'
+        if addQuote in messageContent:
+            await addCopyPasta(message)
     try:
         quoteText = 'quote'
         role_ids = [role.name.lower() for role in message.author.roles]
@@ -366,6 +385,11 @@ def writeMetadata():
     with open(imageDataFile, 'w') as j:
         j.write(newData)
 
+def writeCopyPasta():
+    newData = json.dumps(copyPastaData)
+    with open(copypastaFile, 'w') as j:
+        j.write(newData)
+
 try:
     with open('log.json', 'r') as j:
         log = json.load(j)
@@ -381,6 +405,11 @@ try:
         imageMetadata = json.load(j)
 except:
     imageMetadata = {'datas':[]}
+try:
+    with open(copypastaFile, 'r') as j:
+        copyPastaData = json.load(j)
+except:
+    copyPastaData = {'copyPastas': []}
 
 nltk.download('words')
 nltk.download('brown')

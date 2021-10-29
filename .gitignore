@@ -7,5 +7,6 @@ output/*
 config.json
 log.json
 imageMetaData.json
+copyPasta.json
 
 !*/filesgohere
