@@ -27,7 +27,11 @@ client = discord.Client(intents=intents)
 
 async def postCopypasta(message):
     randomChoice = random.choice(copyPastaData['copyPastas'])
-    await message.reply(randomChoice)
+    if message != None:
+        await message.reply(randomChoice)
+    else:
+        channel = client.get_channel(config['publicChannel'])
+        await channel.send(randomChoice)
 
 async def addCopyPasta(message):
     pastaString = message.content.replace('!addcopypasta', '')
@@ -369,6 +373,8 @@ async def callOnLoop():
         await doSongOfTheDay()
     if datetime.now().minute == 59:
         asyncio.get_event_loop().create_task(scanPictures(True, False))
+    if datetime.now().minute == 8 and (datetime.now().hour == 0 or datetime.now().hour % config['copypastaQuoteRate'] == 0):
+        await postCopypasta(None)
 
 @callOnLoop.before_loop
 async def before():

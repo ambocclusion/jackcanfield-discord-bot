@@ -28,5 +28,7 @@
 	"matchingWordThreshold" : 0.9,
 	"matchingWordBonus" : 0.01,
 	"randomVariation" : 0.1,
-	"randomChance" : 0.5
+	"randomChance" : 0.5,
+
+	"copypastaQuoteRate": 8
 }
