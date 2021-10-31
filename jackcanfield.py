@@ -16,10 +16,12 @@ config = {}
 state = {}
 imageMetadata = {'datas':[]}
 copyPastaData = {'copyPastas':[]}
+foodReviewerBlacklistData = {'blacklist':[]}
 
 configfile = 'config.json'
 imageDataFile = 'imageMetaData.json'
 copypastaFile = 'copypasta.json'
+blacklistFile = 'blacklist.json'
 
 intents = discord.Intents.default()
 intents.members = True
@@ -38,6 +40,17 @@ async def addCopyPasta(message):
     copyPastaData['copyPastas'].append(pastaString)
     await message.reply('added, baby!')
     writeCopyPasta()
+
+async def addBlacklist(message):
+    referencedMessage = await message.channel.fetch_message(message.reference.message_id)
+    if referencedMessage != None and referencedMessage.author == client.user:
+        if referencedMessage.attachments == None or len(referencedMessage.attachments) == 0:
+            await message.reply('can\'t do that, bucko. no pic!')
+        else:
+            embedId = referencedMessage.attachments[0].filename.replace('.png','').replace('.jpg','').replace('.jpeg','').replace('downloads_','')
+            foodReviewerBlacklistData['blacklist'].append(embedId)
+            await message.reply('i got rid of it. i\'m sorry, friend')
+    writeBlacklist()
 
 async def scanImage(filename):
     print('scanning')
@@ -105,7 +118,8 @@ async def foodReviewerPick(message):
         stop_words = set(stopwords.words('english'))
         word_tokens = nltk.wordpunct_tokenize(stringy)
         filtered_sentence = set([w for w in word_tokens if not w.lower() in stop_words])
-        for image in imageMetadata['datas']:
+        imagePool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist']]
+        for image in imagePool:
             matches = 0
             #For each input word, find best matching word in image
             for word in set(filtered_sentence):
@@ -358,6 +372,9 @@ async def on_message(message):
         addQuote = '!addcopypasta'
         if addQuote in messageContent:
             await addCopyPasta(message)
+        blacklistCommand = "blacklist this"
+        if blacklistCommand in messageContent and message.reference != None:
+            await addBlacklist(message)
     try:
         quoteText = 'quote'
         role_ids = [role.name.lower() for role in message.author.roles]
@@ -396,6 +413,11 @@ def writeCopyPasta():
     with open(copypastaFile, 'w') as j:
         j.write(newData)
 
+def writeBlacklist():
+    newData = json.dumps(foodReviewerBlacklistData)
+    with open(blacklistFile, 'w') as j:
+        j.write(newData)
+
 try:
     with open('log.json', 'r') as j:
         log = json.load(j)
@@ -411,6 +433,11 @@ try:
         imageMetadata = json.load(j)
 except:
     imageMetadata = {'datas':[]}
+try:
+    with open(blacklistFile, 'r') as j:
+        foodReviewerBlacklistData = json.load(j)
+except:
+    foodReviewerBlacklistData = {'blacklist': []}
 try:
     with open(copypastaFile, 'r') as j:
         copyPastaData = json.load(j)

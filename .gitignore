@@ -8,5 +8,6 @@ config.json
 log.json
 imageMetaData.json
 copyPasta.json
+blacklist.json
 
 !*/filesgohere
