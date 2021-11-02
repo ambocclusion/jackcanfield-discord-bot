@@ -5,6 +5,7 @@
 	"quoteBg":"./media/jackspiration.png",
 	"welcomeFile":"./media/welcome.json",
 	"welcomeBg":"./media/jackwelcome.jpg",
+	"judgeImg":"./media/judgejack.png",
 
 	"publicChannel":12345678901234567890,
 	"pictureScanChannel": 12345678901234567890,

@@ -17,15 +17,173 @@ state = {}
 imageMetadata = {'datas':[]}
 copyPastaData = {'copyPastas':[]}
 foodReviewerBlacklistData = {'blacklist':[]}
+litigationResponses = {'plaintiff':[], 'defendant':[]}
+
+litigationState = {
+    'inProgress':False,
+    'defendant':0,
+    'plaintiff':0,
+    'amount':0,
+    'lastTime':'',
+    'litigationChannel':0,
+    'lastMessageFromJack':0,
+    'state':'',
+    'defendantClose':False,
+    'plaintiffClose':False,
+    'defendantChance':0.0
+}
+currencyRegex = '\$\s*([.\d,]+)'
 
 configfile = 'config.json'
 imageDataFile = 'imageMetaData.json'
 copypastaFile = 'copypasta.json'
 blacklistFile = 'blacklist.json'
+litigationResponseFile = './media/litigation.json'
 
 intents = discord.Intents.default()
 intents.members = True
 client = discord.Client(intents=intents)
+
+async def litigationEnd(message):
+    channel = await client.fetch_channel(litigationState['litigationChannel'])
+    litigationState['inProgress'] = False
+    chance = random.random()
+    await channel.send('i have heard the defense and the prosecution and have come to a conclusion')
+    await asyncio.sleep(2.0)
+    await channel.send('i find the defendant <@' + str(litigationState['defendant']) + '>...')
+    await asyncio.sleep(5.0)
+    if chance <= litigationState['defendantChance']:
+        await channel.send('NOT GUILTY')
+        await asyncio.sleep(2.0)
+        await channel.send('i order the plaintiff <@' + str(litigationState['plaintiff']) + '> to pay user <@' + str(litigationState['defendant']) + '>\'s legal fees, totaling $' + str(litigationState['amount']) + '!')
+    else:
+        await channel.send('GUILTY')
+        await asyncio.sleep(2.0)
+        await channel.send('i order the defendant <@' + str(litigationState['defendant']) + '> to pay user <@' + str(litigationState['plaintiff']) + '> $' + str(litigationState['amount']) + '!')
+
+async def startClosingStatements(message):
+    await asyncio.sleep(3.0)
+    replyMessage = await message.channel.send('before i present my conclusion, i would like to hear closing statements from <@' + str(litigationState['plaintiff']) + '> and <@' + str(litigationState['defendant']) + '>')
+    litigationState['lastMessageFromJack'] = replyMessage.id
+    litigationState['lastTime'] = datetime.now().timestamp()
+    litigationState['state'] = 'closingStatement'
+
+async def defendantRespond(message):
+    plaintiff = await client.fetch_user(litigationState['plaintiff'])
+    defendant = await client.fetch_user(litigationState['defendant'])
+    reply = random.choice(litigationResponses['defendant']).replace("{DEFENDANT}", str(litigationState['defendant'])).replace("{PLAINTIFF}", str(litigationState['plaintiff']))
+    litigationState['lastTime'] = datetime.now().timestamp()
+    replyMessage = await message.reply(reply)
+    litigationState['lastMessageFromJack'] = replyMessage.id
+    litigationState['defendantChance'] += 0.1
+    await startClosingStatements(message)
+
+async def plaintiffRespond(message):
+    plaintiff = await client.fetch_user(litigationState['plaintiff'])
+    defendant = await client.fetch_user(litigationState['defendant'])
+    reply = random.choice(litigationResponses['plaintiff']).replace("{DEFENDANT}", str(litigationState['defendant'])).replace("{PLAINTIFF}", str(litigationState['plaintiff']))
+    litigationState['lastTime'] = datetime.now().timestamp()
+    replyMessage = await message.reply(reply)
+    litigationState['lastMessageFromJack'] = replyMessage.id
+    litigationState['state'] = 'defendantRespond'
+
+async def litigationResponse(message):
+    print(litigationState['state'])
+    if message.reference == None or litigationState['inProgress'] == False:
+        return
+    referencedMessage = await message.channel.fetch_message(message.reference.message_id)
+    if referencedMessage != None and referencedMessage.author == client.user:
+        if litigationState['state'] == 'waitingForAmount':
+            if message.author.id != litigationState['plaintiff']:
+                litigationState['lastTime'] = datetime.now().timestamp()
+                await message.reply('order! the plaintiff is stating the damages')
+                return
+            if message.author.id == litigationState['plaintiff']:
+                amount = re.findall(currencyRegex, message.content)
+                if len(amount) != 0:
+                    print(amount[0])
+                    litigationState['amount'] = amount[0]
+                    if litigationState['amount'] != 0:
+                        await continueLitigationStart(message)
+        elif litigationState['state'] == 'plaintiffPresent':
+            if message.author.id != litigationState['plaintiff']:
+                litigationState['lastTime'] = datetime.now().timestamp()
+                await message.reply('order in the court! the plaintiff is presenting their case')
+                return
+            if message.author.id == litigationState['plaintiff']:
+                await plaintiffRespond(message)
+        elif litigationState['state'] == 'defendantRespond':
+            if message.author.id != litigationState['defendant']:
+                litigationState['lastTime'] = datetime.now().timestamp()
+                await message.reply('order! order! i want to hear from the defense')
+                return
+            if message.author.id == litigationState['defendant']:
+                await defendantRespond(message)
+        elif litigationState['state'] == 'closingStatement':
+            if message.author.id == litigationState['defendant']:
+                litigationState['defendantClose'] = True
+                litigationState['defendantChance'] += 0.1
+            if message.author.id == litigationState['plaintiff']:
+                litigationState['plaintiffClose'] = True
+            if litigationState['defendantClose'] == False:
+                await message.reply('and the defense?')
+            if litigationState['plaintiffClose'] == False:
+                await message.reply('and the plaintiff?')
+            if litigationState['plaintiffClose'] == True and litigationState['defendantClose'] == True:
+                await litigationEnd(message)
+
+async def continueLitigationStart(message):
+    plaintiff = await client.fetch_user(litigationState['plaintiff'])
+    await message.channel.send('hear ye, hear ye!')
+    await asyncio.sleep(1.0)
+    await message.channel.send('court is now in session!')
+    await asyncio.sleep(3.0)
+    file = open(config['judgeImg'], 'rb')
+    discordFile = discord.File(fp=file)
+    await message.channel.send(file=discordFile)
+    await asyncio.sleep(3.0)
+    await message.channel.send('plaintiff <@' + str(litigationState['plaintiff']) + '> is getting litigious against defendant <@' + str(litigationState['defendant']) + '> for $' + litigationState['amount'] + '!')
+    await asyncio.sleep(5.0)
+    caseMessage = await message.channel.send('user <@' + str(litigationState['plaintiff']) + '>, present your case (reply to this message)')
+    litigationState['lastMessageFromJack'] = caseMessage.id
+    litigationState['lastTime'] = datetime.now().timestamp()
+    litigationState['state'] = 'plaintiffPresent'
+
+async def startLitigation(message):
+    if len(message.mentions) == 0:
+        await message.channel.send('can\'t litigate, no targets!!!')
+        return
+    litigationState['lastTime'] = datetime.now().timestamp()
+    litigationState['inProgress'] = True
+    litigationState['defendant'] = message.mentions[0].id
+    litigationState['plaintiff'] = message.author.id
+    litigationState['plaintiffClose'] = False
+    litigationState['defendantClose'] = False
+    litigationState['litigationChannel'] = message.channel.id
+    litigationState['state'] = 'opening'
+    litigationState['defendantChance'] = 0.05
+    litigationState['amount'] = 0
+    amount = re.findall(currencyRegex, message.content)
+    if len(amount) != 0:
+        print(amount[0])
+        litigationState['amount'] = amount[0]
+    if litigationState['amount'] != 0:
+        await continueLitigationStart(message)
+    else:
+        litigationState['state'] = 'waitingForAmount'
+        replyMessage = await message.reply('state the amount you would like to sue for')
+        litigationState['lastMessageFromJack'] = replyMessage.id
+
+async def litigationLoop(message):
+    messageContent = message.content.lower()
+    litigationPrefix = 'i\'m taking'
+    litigationSuffix = 'to court'
+    if litigationState['inProgress'] == False and litigationPrefix in messageContent and litigationSuffix in messageContent:
+        await startLitigation(message)
+    elif litigationState['inProgress'] == True and litigationPrefix in messageContent and litigationSuffix in messageContent:
+        await message.reply('court is already in session!')
+    elif litigationState['inProgress']:
+        await litigationResponse(message)
 
 async def postCopypasta(message):
     randomChoice = random.choice(copyPastaData['copyPastas'])
@@ -249,7 +407,7 @@ async def newMember(member):
 
 @client.event
 async def on_member_join(member):
-    await newMember(member)                     
+    await newMember(member)
 
 @client.event
 async def on_ready():
@@ -305,8 +463,13 @@ async def on_message(message):
         return
 
     messageContent = message.content.lower()
-    
-    bob = "Odenkirk" 
+
+    role_ids = [role.name.lower() for role in message.author.roles]
+    canLitigate = 'mod mania' in role_ids or 'hot patron' in role_ids or 'twitch subscriber' in role_ids or 'nitro booster' in role_ids
+    if canLitigate == True:
+        await litigationLoop(message)
+
+    bob = "Odenkirk"
     if bob.lower() in messageContent:
         await message.channel.send("bob odenkirk died from fucking the cholula fleshlight")
 
@@ -377,7 +540,6 @@ async def on_message(message):
             await addBlacklist(message)
     try:
         quoteText = 'quote'
-        role_ids = [role.name.lower() for role in message.author.roles]
         canQuote = 'mod mania' in role_ids or 'hot patron' in role_ids or 'twitch subscriber' in role_ids or 'nitro booster' in role_ids
         if quoteText in message.content and message.mentions[0] == client.user and canQuote:
             await sendQuote(message.channel, message.content, message.author)
@@ -392,6 +554,13 @@ async def callOnLoop():
         asyncio.get_event_loop().create_task(scanPictures(True, False))
     if datetime.now().minute == 8 and (datetime.now().hour == 0 or datetime.now().hour % config['copypastaQuoteRate'] == 0):
         await postCopypasta(None)
+
+@tasks.loop(seconds=1)
+async def callEverySecond():
+    if litigationState['inProgress'] == True and datetime.now().timestamp() > litigationState['lastTime'] + 120:
+        print('tuple ' + str(datetime.now().timestamp()))
+        print('message ' + str(litigationState['lastTime']))
+        await litigationEnd(None)
 
 @callOnLoop.before_loop
 async def before():
@@ -443,9 +612,16 @@ try:
         copyPastaData = json.load(j)
 except:
     copyPastaData = {'copyPastas': []}
+try:
+    with open(litigationResponseFile, 'r') as j:
+        litigationResponses = json.load(j)
+except:
+    print("NO LITIGATION FILE")
+
 
 nltk.download('words')
 nltk.download('brown')
 nltk.download('stopwords')
 callOnLoop.start()
+callEverySecond.start()
 client.run(config['botId'])
