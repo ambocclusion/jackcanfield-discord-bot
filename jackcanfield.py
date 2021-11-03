@@ -75,7 +75,7 @@ async def defendantRespond(message):
     litigationState['lastTime'] = datetime.now().timestamp()
     replyMessage = await message.reply(reply)
     litigationState['lastMessageFromJack'] = replyMessage.id
-    litigationState['defendantChance'] += 0.1
+    litigationState['defendantChance'] += 0.25
     await startClosingStatements(message)
 
 async def plaintiffRespond(message):
@@ -176,7 +176,7 @@ async def startLitigation(message):
 
 async def litigationLoop(message):
     messageContent = message.content.lower()
-    litigationPrefix = 'i\'m taking'
+    litigationPrefix = 'taking'
     litigationSuffix = 'to court'
     if litigationState['inProgress'] == False and litigationPrefix in messageContent and litigationSuffix in messageContent:
         await startLitigation(message)
@@ -558,8 +558,6 @@ async def callOnLoop():
 @tasks.loop(seconds=1)
 async def callEverySecond():
     if litigationState['inProgress'] == True and datetime.now().timestamp() > litigationState['lastTime'] + 120:
-        print('tuple ' + str(datetime.now().timestamp()))
-        print('message ' + str(litigationState['lastTime']))
         await litigationEnd(None)
 
 @callOnLoop.before_loop
