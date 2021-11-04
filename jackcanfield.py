@@ -414,7 +414,7 @@ async def on_member_join(member):
 async def on_ready():
     print("bot online")
     channel = client.get_channel(config['ultimateChannel'])
-    await channel.send("baby the big man's up")
+    #await channel.send("baby the big man's up")
 
 async def sendQuote(channel, text, user):
     try:
@@ -551,8 +551,8 @@ async def on_message(message):
 async def callOnLoop():
     if datetime.now().hour == 16 and datetime.now().minute == 20:
         await doSongOfTheDay()
-    if datetime.now().minute == 59:
-        asyncio.get_event_loop().create_task(scanPictures(True, False))
+    #if datetime.now().minute == 59:
+        #asyncio.get_event_loop().create_task(scanPictures(True, False))
     if datetime.now().minute == 8 and (datetime.now().hour == 0 or datetime.now().hour % config['copypastaQuoteRate'] == 0):
         await postCopypasta(None)
 
