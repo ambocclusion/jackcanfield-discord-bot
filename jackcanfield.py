@@ -286,11 +286,12 @@ async def foodReviewerPick(message):
                     foundWords = image['words']
                     foundWord_tokens = nltk.wordpunct_tokenize(foundWords)
                     for imageword in set(foundWord_tokens):
-                        if textdistance.jaccard(word, imageword) >= 0.5:
+                        match = textdistance.jaccard(word, imageword)
+                        if match >= 0.5:
                             bestMatch += 0.5
-                        if textdistance.jaccard(word, imageword) >= 0.8:
+                        if match >= 0.8:
                             bestMatch += 0.8
-                        if textdistance.jaccard(word, imageword) == 1:
+                        if match == 1:
                             bestMatch += 1
                 except:
                     print(traceback.format_exc())
