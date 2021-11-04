@@ -501,7 +501,7 @@ async def on_message(message):
                 messageContent or 'paul' in messageContent or 'freddie' in messageContent or\
                 'freddy' in messageContent or 'steve' in messageContent or 'jason' in messageContent or\
                 'jack' in messageContent:
-            await foodReviewerPick(message)
+            asyncio.get_event_loop().create_task(foodReviewerPick(message))
             return
 
     testing_role_ids = [role.name.lower() for role in message.author.roles]
