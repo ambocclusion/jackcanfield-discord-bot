@@ -468,7 +468,7 @@ async def on_message(message):
     role_ids = [role.name.lower() for role in message.author.roles]
     canLitigate = 'mod mania' in role_ids or 'hot patron' in role_ids or 'twitch subscriber' in role_ids or 'nitro booster' in role_ids
     if canLitigate == True:
-        await litigationLoop(message)
+        asyncio.get_event_loop().create_task(litigationLoop(message))
 
     bob = "Odenkirk"
     if bob.lower() in messageContent:
@@ -502,7 +502,6 @@ async def on_message(message):
                 'freddy' in messageContent or 'steve' in messageContent or 'jason' in messageContent or\
                 'jack' in messageContent:
             asyncio.get_event_loop().create_task(foodReviewerPick(message))
-            return
 
     testing_role_ids = [role.name.lower() for role in message.author.roles]
     if 'mod mania' in testing_role_ids:
@@ -543,7 +542,7 @@ async def on_message(message):
         quoteText = 'quote'
         canQuote = 'mod mania' in role_ids or 'hot patron' in role_ids or 'twitch subscriber' in role_ids or 'nitro booster' in role_ids
         if quoteText in message.content and message.mentions[0] == client.user and canQuote:
-            await sendQuote(message.channel, message.content, message.author)
+            asyncio.get_event_loop().create_task(sendQuote(message.channel, message.content, message.author))
     except Exception as e:
         await message.channel.send('Unexpected error: ' + e)
 
