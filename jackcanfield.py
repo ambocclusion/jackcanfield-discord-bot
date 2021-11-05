@@ -285,24 +285,27 @@ async def foodReviewerPick(message):
         filtered_sentence = set([w for w in word_tokens if not w.lower() in stop_words])
         imagePool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist']]
         for image in imagePool:
-            matches = 0
-            foundWords = image['words'].split()
-            #For each input word, find best matching word in image
-            for word in set(filtered_sentence):
-                bestMatch = 0
-                try:
-                    for imageword in foundWords:
-                        match = textdistance.jaccard(word, imageword)
-                        if match >= 0.5:
-                            bestMatch += 0.5
-                        if match >= 0.8:
-                            bestMatch += 0.8
-                        if match == 1:
-                            bestMatch += 1
-                except:
-                    print(traceback.format_exc())
-                matches += bestMatch
-            matchlist.append({'image' : image, 'matches' : matches})
+            try:
+                matches = 0
+                foundWords = image['words'].split()
+                #For each input word, find best matching word in image
+                for word in set(filtered_sentence):
+                    bestMatch = 0
+                    try:
+                        for imageword in foundWords:
+                            match = textdistance.jaccard(word, imageword)
+                            if match >= 0.5:
+                                bestMatch += 0.5
+                            if match >= 0.8:
+                                bestMatch += 0.8
+                            if match == 1:
+                                bestMatch += 1
+                    except:
+                        print(traceback.format_exc())
+                    matches += bestMatch
+                matchlist.append({'image' : image, 'matches' : matches})
+            except:
+                print(traceback.format_exc())
         matchlist = [m for m in matchlist if 'words' in m['image']]
         matchlist.sort(key=lambda m: m['matches'])
         if len(matchlist) > 0:
