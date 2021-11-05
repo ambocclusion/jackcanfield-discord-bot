@@ -295,12 +295,8 @@ async def foodReviewerPick(message):
                     try:
                         for imageword in foundWords:
                             match = SequenceMatcher(None, word, imageword).ratio()
-                            if match >= 0.5:
-                                bestMatch += 0.5
-                            if match >= 0.8:
-                                bestMatch += 0.8
-                            if match == 1:
-                                bestMatch += 1
+                            bestMatch += match
+                            if match >= .8: bestMatch += match
                     except:
                         print(traceback.format_exc())
                     matches += bestMatch
@@ -311,7 +307,7 @@ async def foodReviewerPick(message):
         matchlist.sort(key=lambda m: m['matches'])
         if len(matchlist) > 0:
             if matchlist[-1]['matches'] != 0:
-                selections = [match for match in matchlist if match['matches'] > math.floor(matchlist[-1]['matches'] * 0.5) or match['matches'] == matchlist[-1]['matches']]
+                selections = [match for match in matchlist if match['matches'] > math.floor(matchlist[-1]['matches'] * 0.75) or match['matches'] == matchlist[-1]['matches']]
             else:
                 selections = [match for match in matchlist if not match['image']['words']]
             retryCounter = 0
