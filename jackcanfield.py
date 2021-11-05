@@ -286,13 +286,12 @@ async def foodReviewerPick(message):
         imagePool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist']]
         for image in imagePool:
             matches = 0
+            foundWords = image['words'].split()
             #For each input word, find best matching word in image
             for word in set(filtered_sentence):
                 bestMatch = 0
                 try:
-                    foundWords = image['words'].split()
-                    #foundWord_tokens = nltk.wordpunct_tokenize(foundWords)
-                    for imageword in set(foundWords):
+                    for imageword in foundWords:
                         match = textdistance.jaccard(word, imageword)
                         if match >= 0.5:
                             bestMatch += 0.5
@@ -575,8 +574,12 @@ async def before():
     print('Finished waiting')
 
 async def debugLog(message):
-    channel = await client.fetch_channel(config['logChannel'])
-    await channel.send(message)
+    try:
+        channel = await client.fetch_channel(config['logChannel'])
+        await channel.send(message)
+    except:
+        print(traceback.format_exc())
+        print(message)
 
 def writeLog():
     newJson = json.dumps(log)
