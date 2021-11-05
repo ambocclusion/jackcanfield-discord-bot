@@ -1,5 +1,5 @@
 import os, random, discord, ffmpeg, textwrap, json, googleapiclient.discovery, requests, textdistance, pytesseract, nltk, re, \
-asyncio, math, io, traceback, time
+asyncio, math, io, traceback, time, sys
 
 from discord.ext import tasks
 from PIL import Image, ImageDraw, ImageFont
@@ -276,7 +276,8 @@ async def scanPictures(remote, force):
     print('finished scanning')
 
 async def foodReviewerPick(message):
-    startTime = time.perf_counter()
+    startTime = time.perf_counter() 
+    full_trace = sys.exc_info() # Grab the full traceback and quite possibly hurt some feelings.
     try:
         matchlist = []
         before, keyword, stringy = message.content.lower().partition('think')
@@ -301,7 +302,8 @@ async def foodReviewerPick(message):
                             if match == 1:
                                 bestMatch += 1
                     except:
-                        print(traceback.format_exc())
+                        print(traceback.format_exc(*full_trace))
+                        del full_trace
                     matches += bestMatch
                 matchlist.append({'image' : image, 'matches' : matches})
             except:
@@ -323,14 +325,16 @@ async def foodReviewerPick(message):
                     break
                 except:
                     retryCounter += 1
-                    await debugLog(traceback.format_exc())
+                    await debugLog(traceback.format_exc(*full_trace))
+                    del full_trace
             #await message.channel.send(file=file)
             endTime = time.perf_counter()
             queryTime = f'{endTime - startTime:0.4f}'
             await message.reply(file=file)
             await debugLog('text: ' + ' '.join(filtered_sentence) + ' | words: ' +selection['image']['words'] + ' | matches: ' + str(selection['matches']) + ' | amount ' + str(len(selections)) + '\nquery took : ' + queryTime + ' seconds')
     except Exception as e:
-        await debugLog(traceback.format_exc())
+        await debugLog(traceback.format_exc(*full_trace))
+        del full_trace
 
 def GetAllPlaylistItems():
     url = config['playlistUrl']
