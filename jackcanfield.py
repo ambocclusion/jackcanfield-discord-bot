@@ -30,6 +30,7 @@ litigationState = {
     'state':'',
     'defendantClose':False,
     'plaintiffClose':False,
+    'plaintiffInitialResponse':False,
     'defendantChance':0.0
 }
 currencyRegex = '\$\s*([.\d,]+)'
@@ -48,18 +49,21 @@ async def litigationEnd(message):
     channel = await client.fetch_channel(litigationState['litigationChannel'])
     litigationState['inProgress'] = False
     chance = random.random()
-    await channel.send('i have heard the defense and the prosecution and have come to a conclusion')
-    await asyncio.sleep(2.0)
-    await channel.send('i find the defendant <@' + str(litigationState['defendant']) + '>...')
-    await asyncio.sleep(5.0)
-    if chance <= litigationState['defendantChance']:
-        await channel.send('NOT GUILTY')
+    if litigationState['plaintiffInitialResponse'] == True:
+        await channel.send('i have heard the defense and the prosecution and have come to a conclusion')
         await asyncio.sleep(2.0)
-        await channel.send('i order the plaintiff <@' + str(litigationState['plaintiff']) + '> to pay user <@' + str(litigationState['defendant']) + '>\'s legal fees, totaling $' + str(litigationState['amount']) + '!')
+        await channel.send('i find the defendant <@' + str(litigationState['defendant']) + '>...')
+        await asyncio.sleep(5.0)
+        if chance <= litigationState['defendantChance']:
+            await channel.send('NOT GUILTY')
+            await asyncio.sleep(2.0)
+            await channel.send('i order the plaintiff <@' + str(litigationState['plaintiff']) + '> to pay user <@' + str(litigationState['defendant']) + '>\'s legal fees, totaling $' + str(litigationState['amount']) + '!')
+        else:
+            await channel.send('GUILTY')
+            await asyncio.sleep(2.0)
+            await channel.send('i order the defendant <@' + str(litigationState['defendant']) + '> to pay user <@' + str(litigationState['plaintiff']) + '> $' + str(litigationState['amount']) + '!')
     else:
-        await channel.send('GUILTY')
-        await asyncio.sleep(2.0)
-        await channel.send('i order the defendant <@' + str(litigationState['defendant']) + '> to pay user <@' + str(litigationState['plaintiff']) + '> $' + str(litigationState['amount']) + '!')
+        await channel.send('the plaintiff has not provided any evidence. CASE DISMISSED!')
 
 async def startClosingStatements(message):
     await asyncio.sleep(3.0)
@@ -86,26 +90,27 @@ async def plaintiffRespond(message):
     replyMessage = await message.reply(reply)
     litigationState['lastMessageFromJack'] = replyMessage.id
     litigationState['state'] = 'defendantRespond'
+    litigationState['plaintiffInitialResponse'] = True
 
 async def litigationResponse(message):
     print(litigationState['state'])
+    if litigationState['state'] == 'waitingForAmount':
+        if message.author.id != litigationState['plaintiff']:
+            litigationState['lastTime'] = datetime.now().timestamp()
+            await message.reply('order! the plaintiff is stating the damages')
+            return
+        if message.author.id == litigationState['plaintiff']:
+            amount = re.findall(currencyRegex, message.content)
+            if len(amount) != 0:
+                print(amount[0])
+                litigationState['amount'] = amount[0]
+                if litigationState['amount'] != 0:
+                    await continueLitigationStart(message)
     if message.reference == None or litigationState['inProgress'] == False:
         return
     referencedMessage = await message.channel.fetch_message(message.reference.message_id)
     if referencedMessage != None and referencedMessage.author == client.user:
-        if litigationState['state'] == 'waitingForAmount':
-            if message.author.id != litigationState['plaintiff']:
-                litigationState['lastTime'] = datetime.now().timestamp()
-                await message.reply('order! the plaintiff is stating the damages')
-                return
-            if message.author.id == litigationState['plaintiff']:
-                amount = re.findall(currencyRegex, message.content)
-                if len(amount) != 0:
-                    print(amount[0])
-                    litigationState['amount'] = amount[0]
-                    if litigationState['amount'] != 0:
-                        await continueLitigationStart(message)
-        elif litigationState['state'] == 'plaintiffPresent':
+        if litigationState['state'] == 'plaintiffPresent':
             if message.author.id != litigationState['plaintiff']:
                 litigationState['lastTime'] = datetime.now().timestamp()
                 await message.reply('order in the court! the plaintiff is presenting their case')
@@ -159,6 +164,7 @@ async def startLitigation(message):
     litigationState['plaintiff'] = message.author.id
     litigationState['plaintiffClose'] = False
     litigationState['defendantClose'] = False
+    litigationState['plaintiffInitialResponse'] = False
     litigationState['litigationChannel'] = message.channel.id
     litigationState['state'] = 'opening'
     litigationState['defendantChance'] = 0.05
