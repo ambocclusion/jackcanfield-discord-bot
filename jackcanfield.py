@@ -325,9 +325,9 @@ async def foodReviewerPick(message):
                     retryCounter += 1
                     await debugLog(traceback.format_exc())
             #await message.channel.send(file=file)
-            await message.reply(file=file)
             endTime = time.perf_counter()
             queryTime = f'{endTime - startTime:0.4f}'
+            await message.reply(file=file)
             await debugLog('text: ' + ' '.join(filtered_sentence) + ' | words: ' +selection['image']['words'] + ' | matches: ' + str(selection['matches']) + ' | amount ' + str(len(selections)) + '\nquery took : ' + queryTime + ' seconds')
     except Exception as e:
         await debugLog(traceback.format_exc())
