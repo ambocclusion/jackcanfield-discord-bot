@@ -1,4 +1,4 @@
-import os, random, discord, ffmpeg, textwrap, json, googleapiclient.discovery, requests, textdistance, pytesseract, nltk, re, \
+import os, random, discord, ffmpeg, textwrap, json, googleapiclient.discovery, requests, pytesseract, nltk, re, \
 asyncio, math, io, traceback, time
 
 from discord.ext import tasks
@@ -10,6 +10,7 @@ from nltk.corpus import brown
 from nltk.corpus import stopwords
 from wand.image import Image as wandImage
 from wand.color import Color
+from difflib import SequenceMatcher
 
 log = {}
 config = {}
@@ -293,7 +294,7 @@ async def foodReviewerPick(message):
                     bestMatch = 0
                     try:
                         for imageword in foundWords:
-                            match = textdistance.jaccard(word, imageword)
+                            match = SequenceMatcher(None, word, imageword).ratio()
                             if match >= 0.5:
                                 bestMatch += 0.5
                             if match >= 0.8:
