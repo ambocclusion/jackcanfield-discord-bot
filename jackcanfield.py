@@ -276,6 +276,7 @@ async def scanPictures(remote, force):
     print('finished scanning')
 
 async def foodReviewerPick(message):
+    startTime = time.perf_counter()
     try:
         matchlist = []
         before, keyword, stringy = message.content.lower().partition('think')
@@ -289,9 +290,9 @@ async def foodReviewerPick(message):
             for word in set(filtered_sentence):
                 bestMatch = 0
                 try:
-                    foundWords = image['words']
-                    foundWord_tokens = nltk.wordpunct_tokenize(foundWords)
-                    for imageword in set(foundWord_tokens):
+                    foundWords = image['words'].split()
+                    #foundWord_tokens = nltk.wordpunct_tokenize(foundWords)
+                    for imageword in set(foundWords):
                         match = textdistance.jaccard(word, imageword)
                         if match >= 0.5:
                             bestMatch += 0.5
@@ -320,12 +321,14 @@ async def foodReviewerPick(message):
                     break
                 except:
                     retryCounter += 1
-                    print(traceback.format_exc())
+                    await debugLog(traceback.format_exc())
             #await message.channel.send(file=file)
             await message.reply(file=file)
-            print('text: ' + ' '.join(filtered_sentence) + ' | words: ' +selection['image']['words'] + ' | matches: ' + str(selection['matches']) + ' | amount ' + str(len(selections)))
+            endTime = time.perf_counter()
+            queryTime = f'{endTime - startTime:0.4f}'
+            await debugLog('text: ' + ' '.join(filtered_sentence) + ' | words: ' +selection['image']['words'] + ' | matches: ' + str(selection['matches']) + ' | amount ' + str(len(selections)) + '\nquery took : ' + queryTime + ' seconds')
     except Exception as e:
-        print(traceback.format_exc())
+        await debugLog(traceback.format_exc())
 
 def GetAllPlaylistItems():
     url = config['playlistUrl']
@@ -570,6 +573,10 @@ async def callEverySecond():
 async def before():
     await client.wait_until_ready()
     print('Finished waiting')
+
+async def debugLog(message):
+    channel = await client.fetch_channel(config['logChannel'])
+    await channel.send(message)
 
 def writeLog():
     newJson = json.dumps(log)

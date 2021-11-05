@@ -9,6 +9,7 @@
 
 	"publicChannel":12345678901234567890,
 	"pictureScanChannel": 12345678901234567890,
+	"logChannel": 1234567980,
 
 	"quoteFont":"./media/seguihis.ttf",
 	"outputjackquoteimg":"output/outputjackimg.png",
