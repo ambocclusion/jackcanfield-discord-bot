@@ -288,15 +288,17 @@ async def foodReviewerPick(message):
         for image in imagePool:
             try:
                 matches = 0
-                foundWords = image['words'].split()
+                foundWords = [w for w in image['words'].split() if len(w) > 2]
                 #For each input word, find best matching word in image
                 for word in set(filtered_sentence):
                     bestMatch = 0
                     try:
                         for imageword in foundWords:
-                            match = SequenceMatcher(None, word, imageword).ratio()
-                            bestMatch += match
-                            if match >= .8: bestMatch += match
+                            if abs(len(word) - len(imageword)) <= 2:
+                                match = SequenceMatcher(None, word, imageword).ratio()
+                                bestMatch += match
+                                if match >= .8: bestMatch += match
+                                if matches > 3: break
                     except:
                         print(traceback.format_exc())
                     matches += bestMatch
@@ -307,7 +309,7 @@ async def foodReviewerPick(message):
         matchlist.sort(key=lambda m: m['matches'])
         if len(matchlist) > 0:
             if matchlist[-1]['matches'] != 0:
-                selections = [match for match in matchlist if match['matches'] > math.floor(matchlist[-1]['matches'] * 0.75) or match['matches'] == matchlist[-1]['matches']]
+                selections = [match for match in matchlist if match['matches'] > math.floor(matchlist[-1]['matches'] * 0.9) or match['matches'] == matchlist[-1]['matches']]
             else:
                 selections = [match for match in matchlist if not match['image']['words']]
             retryCounter = 0
