@@ -96,10 +96,6 @@ async def plaintiffRespond(message):
 async def litigationResponse(message):
     print(litigationState['state'])
     if litigationState['state'] == 'waitingForAmount':
-        if message.author.id != litigationState['plaintiff']:
-            litigationState['lastTime'] = datetime.now().timestamp()
-            await message.reply('order! the plaintiff is stating the damages')
-            return
         if message.author.id == litigationState['plaintiff']:
             amount = re.findall(currencyRegex, message.content)
             if len(amount) != 0:
@@ -111,6 +107,11 @@ async def litigationResponse(message):
         return
     referencedMessage = await message.channel.fetch_message(message.reference.message_id)
     if referencedMessage != None and referencedMessage.author == client.user:
+        if litigationState['state'] == 'waitingForAmount':
+            if message.author.id != litigationState['plaintiff']:
+                litigationState['lastTime'] = datetime.now().timestamp()
+                await message.reply('order! the plaintiff is stating the damages')
+                return
         if litigationState['state'] == 'plaintiffPresent':
             if message.author.id != litigationState['plaintiff']:
                 litigationState['lastTime'] = datetime.now().timestamp()
