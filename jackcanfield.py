@@ -10,7 +10,7 @@ from nltk.corpus import brown
 from nltk.corpus import stopwords
 from wand.image import Image as wandImage
 from wand.color import Color
-from difflib import SequenceMatcher
+from difflib import SequenceMatcher, get_close_matches
 
 log = {}
 config = {}
@@ -294,12 +294,8 @@ async def foodReviewerPick(message):
                 for word in set(filtered_sentence):
                     bestMatch = 0
                     try:
-                        for imageword in foundWords:
-                            if abs(len(word) - len(imageword)) <= 2:
-                                match = SequenceMatcher(None, word, imageword).ratio()
-                                bestMatch += match
-                                if match >= .8: bestMatch += match
-                                if matches > 3: break
+                        match = get_close_matches(word, set(foundWords), n=5, cutoff=0.6)
+                        bestMatch += len(match)
                     except:
                         print(traceback.format_exc())
                     matches += bestMatch
