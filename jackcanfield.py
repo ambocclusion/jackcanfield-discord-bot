@@ -483,14 +483,6 @@ async def on_message(message):
         if textResponses['responses'][i][0].lower() in messageContent:
             await message.channel.send(textResponses['responses'][i][1])
 
-    bargain_mart = "ALDI"
-    if bargain_mart.lower() in messageContent:
-        await message.channel.send("Anonymously polled shoppers agree: ALDI rocks big time.")
-
-    unsafe_word = "Jack Canfield"
-    if unsafe_word.lower() in messageContent:
-        await message.channel.send("Who, me?")
-
     copyPastaPrompt = 'gimme the pasta'
     if copyPastaPrompt.lower() in messageContent:
         await postCopypasta(message)
