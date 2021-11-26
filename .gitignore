@@ -9,5 +9,6 @@ log.json
 imageMetaData.json
 copyPasta.json
 blacklist.json
+textResponses.json
 
 !*/filesgohere

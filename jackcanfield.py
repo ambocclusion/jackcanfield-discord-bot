@@ -19,6 +19,7 @@ imageMetadata = {'datas':[]}
 copyPastaData = {'copyPastas':[]}
 foodReviewerBlacklistData = {'blacklist':[]}
 litigationResponses = {'plaintiff':[], 'defendant':[]}
+textResponses = {'responses' : []}
 
 litigationState = {
     'inProgress':False,
@@ -41,6 +42,7 @@ imageDataFile = 'imageMetaData.json'
 copypastaFile = 'copypasta.json'
 blacklistFile = 'blacklist.json'
 litigationResponseFile = './media/litigation.json'
+textResponsesFile = 'textResponses.json'
 
 intents = discord.Intents.default()
 intents.members = True
@@ -477,9 +479,9 @@ async def on_message(message):
     if canLitigate == True:
         asyncio.get_event_loop().create_task(litigationLoop(message))
 
-    bob = "Odenkirk"
-    if bob.lower() in messageContent:
-        await message.channel.send("bob odenkirk died from fucking the cholula fleshlight")
+    for i in range(len(textResponses['responses'])):
+        if textResponses['responses'][i][0].lower() in messageContent:
+            await message.channel.send(textResponses['responses'][i][1])
 
     bargain_mart = "ALDI"
     if bargain_mart.lower() in messageContent:
@@ -601,6 +603,11 @@ def writeBlacklist():
     with open(blacklistFile, 'w') as j:
         j.write(newData)
 
+def writeTextResponses():
+    newData = json.dumps(textResponses)
+    with open(textResponsesFile, 'w') as j:
+        j.write(newData)
+
 def loadFile(path, defaultObj):
     print(f'loading {path}')
     try:
@@ -610,7 +617,7 @@ def loadFile(path, defaultObj):
         return defaultObj
 
 def loadData():
-    global log, config, imageMetadata, foodReviewerBlacklistData, copyPastaData, litigationResponses
+    global log, config, imageMetadata, foodReviewerBlacklistData, copyPastaData, litigationResponses, textResponses
     log = loadFile('log.json', {'logs': []})
     config = loadFile(configfile, None)
     if config == None:
@@ -619,6 +626,7 @@ def loadData():
     foodReviewerBlacklistData = loadFile(blacklistFile, {'blacklist': []})
     copyPastaData = loadFile(copypastaFile, {'copyPastas': []})
     litigationResponses = loadFile(litigationResponseFile, {})
+    textResponses = loadFile(textResponsesFile, {'responses':[]})
 
 if __name__ == "__main__":
     loadData()
