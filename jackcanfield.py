@@ -576,6 +576,7 @@ async def debugLog(message):
     try:
         channel = await client.fetch_channel(config['logChannel'])
         await channel.send(message)
+        print(message)
     except:
         print(traceback.format_exc())
         print(message)
@@ -600,41 +601,31 @@ def writeBlacklist():
     with open(blacklistFile, 'w') as j:
         j.write(newData)
 
-try:
-    with open('log.json', 'r') as j:
-        log = json.load(j)
-except:
-    log = {'logs' : []}
-try:
-    with open(configfile, 'r') as j:
-        config = json.load(j)
-except:
-    raise Exception("NO CONFIG FILE")
-try:
-    with open(imageDataFile, 'r') as j:
-        imageMetadata = json.load(j)
-except:
-    imageMetadata = {'datas':[]}
-try:
-    with open(blacklistFile, 'r') as j:
-        foodReviewerBlacklistData = json.load(j)
-except:
-    foodReviewerBlacklistData = {'blacklist': []}
-try:
-    with open(copypastaFile, 'r') as j:
-        copyPastaData = json.load(j)
-except:
-    copyPastaData = {'copyPastas': []}
-try:
-    with open(litigationResponseFile, 'r') as j:
-        litigationResponses = json.load(j)
-except:
-    print("NO LITIGATION FILE")
+def loadFile(path, defaultObj):
+    print(f'loading {path}')
+    try:
+        with open(path, 'r') as j:
+            return json.load(j)
+    except:
+        return defaultObj
 
+def loadData():
+    global log, config, imageMetadata, foodReviewerBlacklistData, copyPastaData, litigationResponses
+    log = loadFile('log.json', {'logs': []})
+    config = loadFile(configfile, None)
+    if config == None:
+        raise Exception("NO CONFIG FILE")
+    imageMetadata = loadFile(imageDataFile, {'datas': []})
+    foodReviewerBlacklistData = loadFile(blacklistFile, {'blacklist': []})
+    copyPastaData = loadFile(copypastaFile, {'copyPastas': []})
+    litigationResponses = loadFile(litigationResponseFile, {})
 
-nltk.download('words')
-nltk.download('brown')
-nltk.download('stopwords')
-callOnLoop.start()
-callEverySecond.start()
-client.run(config['botId'])
+if __name__ == "__main__":
+    loadData()
+
+    nltk.download('words')
+    nltk.download('brown')
+    nltk.download('stopwords')
+    callOnLoop.start()
+    callEverySecond.start()
+    client.run(config['botId'])
