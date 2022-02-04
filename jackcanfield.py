@@ -551,7 +551,7 @@ async def on_message(message):
 async def callOnLoop():
     if datetime.now().hour == 16 and datetime.now().minute == 20:
         await doSongOfTheDay()
-    if datetime.now().hour == 3:
+    if datetime.now().hour == 3 and datetime.now().minute == 30:
         debugLog("scanning the screenshots!!!!!!!")
         asyncio.get_event_loop().create_task(scanPictures(True, False))
     if datetime.now().minute == 8 and (datetime.now().hour == 0 or datetime.now().hour % config['copypastaQuoteRate'] == 0):
