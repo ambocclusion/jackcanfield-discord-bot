@@ -279,6 +279,7 @@ async def scanPictures(remote, force):
         except Exception as e:
             print(e)
     print('finished scanning')
+    await debugLog("done scanning my bruddas")
 
 async def foodReviewerPick(message):
     startTime = time.perf_counter()
