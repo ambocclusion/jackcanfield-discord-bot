@@ -48,6 +48,20 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client(intents=intents)
 
+async def gimmeBrother(message):
+    imagePool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist']]
+    brothers = []
+    for image in imagePool:
+        foundWords = [w for w in image['words'].split() if len(w) > 2]
+        for word in foundWords:
+            if 'brother' in word:
+                brothers.append(image)
+    ran = random.choice(brothers)
+    filepath = config['pictureDownloadFolder'] + '/' + ran['id'] + '.png'
+    reviewerPic = open(filepath, 'rb')
+    file = discord.File(fp=reviewerPic)
+    await message.reply(file=file)
+
 async def searchTerm(message):
     query = message.content.replace('!search', '')
     word_tokens = nltk.wordpunct_tokenize(query)
@@ -503,9 +517,13 @@ async def on_message(message):
     messageContent = message.content.lower()
 
     role_ids = [role.name.lower() for role in message.author.roles]
-    canLitigate = 'mod mania' in role_ids or 'hot patron' in role_ids or 'twitch subscriber' in role_ids or 'nitro booster' in role_ids
-    if canLitigate == True:
+    elevatedUser = 'mod mania' in role_ids or 'hot patron' in role_ids or 'twitch subscriber' in role_ids or 'nitro booster' in role_ids
+    if elevatedUser == True:
         asyncio.get_event_loop().create_task(litigationLoop(message))
+
+        if 'gimme a brother' in messageContent:
+            await gimmeBrother(message)
+
 
     for i in range(len(textResponses['responses'])):
         if textResponses['responses'][i][0].lower() in messageContent:
