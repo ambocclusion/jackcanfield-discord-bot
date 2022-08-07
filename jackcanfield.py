@@ -70,7 +70,7 @@ async def searchTerm(message):
         try:
             await checkAndPostSearch(sentence, image['words'], image, message)
         except Exception as e:
-            await debugLog(traceback.format_exc())
+            continue
 
 
 async def checkAndPostSearch(sentence, foundWords, image, message):
