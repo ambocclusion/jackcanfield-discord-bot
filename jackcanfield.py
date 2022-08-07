@@ -52,10 +52,13 @@ async def gimmeBrother(message):
     imagePool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist']]
     brothers = []
     for image in imagePool:
-        foundWords = [w for w in image['words'].split() if len(w) > 2]
-        for word in foundWords:
-            if 'brother' in word:
-                brothers.append(image)
+        try:
+            foundWords = [w for w in image['words'].split() if len(w) > 2]
+            for word in foundWords:
+                if 'brother' in word:
+                    brothers.append(image)
+        except Exception as e:
+            continue
     ran = random.choice(brothers)
     filepath = config['pictureDownloadFolder'] + '/' + ran['id'] + '.png'
     reviewerPic = open(filepath, 'rb')
