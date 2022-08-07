@@ -53,12 +53,12 @@ async def gimmeBrother(message):
     brothers = []
     for image in imagePool:
         try:
-            foundWords = [w for w in image['words'].split() if len(w) > 2]
-            for word in foundWords:
-                if 'brother' in word:
-                    brothers.append(image)
+            if 'brother' in image['words'] and 'my brother' not in image['words']:
+                brothers.append(image)
         except Exception as e:
             continue
+    if len(brothers) == 0:
+        return
     ran = random.choice(brothers)
     filepath = config['pictureDownloadFolder'] + '/' + ran['id'] + '.png'
     reviewerPic = open(filepath, 'rb')
