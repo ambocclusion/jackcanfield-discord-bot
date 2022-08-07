@@ -53,7 +53,7 @@ async def gimmeBrother(message):
     brothers = []
     for image in imagePool:
         try:
-            if 'brother' in image['words'] and 'my brother' not in image['words']:
+            if 'brother' in image['words'] and 'my brother' not in image['words'] and 'for brother' not in image['words']:
                 brothers.append(image)
         except Exception as e:
             continue
