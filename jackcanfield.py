@@ -64,28 +64,22 @@ async def gimmeBrother(message):
 
 async def searchTerm(message):
     query = message.content.replace('!search', '')
-    word_tokens = nltk.wordpunct_tokenize(query)
-    filtered_sentence = set([w for w in word_tokens])
+    sentence = query.lower().strip()
     imagePool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist']]
     for image in imagePool:
         try:
-            foundWords = [w for w in image['words'].split() if len(w) > 2]
-            await checkAndPostSearch(filtered_sentence, foundWords, image, message)
+            await checkAndPostSearch(sentence, image['words'], image, message)
         except Exception as e:
             await debugLog(traceback.format_exc())
 
 
-async def checkAndPostSearch(filtered_sentence, foundWords, image, message):
-    for word in set(filtered_sentence):
-        for word2 in foundWords:
-            if word in word2:
-                filepath = config['pictureDownloadFolder'] + '/' + image['id'] + '.png'
-                reviewerPic = open(filepath, 'rb')
-                file = discord.File(fp=reviewerPic)
-                await message.reply(file=file)
-                await asyncio.sleep(0.1)
-                return True
-    return False
+async def checkAndPostSearch(sentence, foundWords, image, message):
+    if sentence in foundWords:
+        filepath = config['pictureDownloadFolder'] + '/' + image['id'] + '.png'
+        reviewerPic = open(filepath, 'rb')
+        file = discord.File(fp=reviewerPic)
+        await message.reply(file=file)
+        await asyncio.sleep(0.1)
 
 
 async def litigationEnd(message):
