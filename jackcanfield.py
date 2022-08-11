@@ -521,6 +521,8 @@ async def on_message(message):
         if 'gimme a brother' in messageContent:
             await gimmeBrother(message)
 
+    if '!search' in messageContent and message.channel.id == config['logChannel']:
+        await searchTerm(message)
 
     for i in range(len(textResponses['responses'])):
         if textResponses['responses'][i][0].lower() in messageContent:
@@ -582,8 +584,6 @@ async def on_message(message):
         blacklistCommand = "blacklist this"
         if blacklistCommand in messageContent and message.reference != None:
             await addBlacklist(message)
-        if '!search' in messageContent and message.channel.id == config['logChannel']:
-            await searchTerm(message)
     try:
         quoteText = 'quote'
         canQuote = 'mod mania' in role_ids or 'hot patron' in role_ids or 'twitch subscriber' in role_ids or 'nitro booster' in role_ids
