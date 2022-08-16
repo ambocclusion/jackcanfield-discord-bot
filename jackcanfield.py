@@ -432,7 +432,7 @@ def get_all_playlist_items():
     query = parse_qs(urlparse(url).query, keep_blank_values=True)
     playlist_id = query['list'][0]
     print(f'get all playlist items links from {playlist_id}')
-    youtube = googleapiclient.build('youtube', 'v3', developerKey=config['youtubeApiKey'])
+    youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=config['youtubeApiKey'])
 
     request = youtube.playlistItems().list(
         part='snippet',
