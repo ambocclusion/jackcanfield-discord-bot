@@ -71,11 +71,14 @@ async def searchTerm(message):
     imagePool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist']]
     found = [i for i in imagePool if sentence in i['words']]
     for image in found:
-        filepath = config['pictureDownloadFolder'] + '/' + image['id'] + '.png'
-        reviewerPic = open(filepath, 'rb')
-        file = discord.File(fp=reviewerPic)
-        await message.reply(file=file)
-        await asyncio.sleep(0.1)
+        try:
+            filepath = config['pictureDownloadFolder'] + '/' + image['id'] + '.png'
+            reviewerPic = open(filepath, 'rb')
+            file = discord.File(fp=reviewerPic)
+            await message.reply(file=file)
+            await asyncio.sleep(0.1)
+        except Exception as e:
+            continue
 
 
 async def litigationEnd(message):
