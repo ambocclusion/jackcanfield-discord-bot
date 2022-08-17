@@ -69,15 +69,8 @@ async def searchTerm(message):
     query = message.content.replace('!search', '')
     sentence = query.lower().strip()
     imagePool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist']]
-    for image in imagePool:
-        try:
-            await checkAndPostSearch(sentence, image['words'], image, message)
-        except Exception as e:
-            continue
-
-
-async def checkAndPostSearch(sentence, foundWords, image, message):
-    if sentence in foundWords:
+    found = [i for i in imagePool if sentence in i['words']]
+    for image in found:
         filepath = config['pictureDownloadFolder'] + '/' + image['id'] + '.png'
         reviewerPic = open(filepath, 'rb')
         file = discord.File(fp=reviewerPic)
