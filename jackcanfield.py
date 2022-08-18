@@ -69,7 +69,13 @@ async def searchTerm(message):
     query = message.content.replace('!search', '')
     sentence = query.lower().strip()
     imagePool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist']]
-    found = [i for i in imagePool if sentence in i['words']]
+    found = []
+    for image in imagePool:
+        try:
+            if sentence in image['words']:
+                found.append(image)
+        except Exception as e:
+            continue
     for image in found:
         try:
             filepath = config['pictureDownloadFolder'] + '/' + image['id'] + '.png'
