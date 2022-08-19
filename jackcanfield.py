@@ -49,7 +49,7 @@ litigationState = {
     'plaintiffInitialResponse': False,
     'defendantChance': 0.0
 }
-currencyRegex = r"'\$\s*([.\d,]+)'"
+currencyRegex = r'[\¢\€\$]\s*([.\d,]+)'
 
 configfile = 'config.json'
 imageDataFile = 'imageMetaData.json'
