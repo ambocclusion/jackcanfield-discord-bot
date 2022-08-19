@@ -49,7 +49,7 @@ litigationState = {
     'plaintiffInitialResponse': False,
     'defendantChance': 0.0
 }
-currencyRegex = '\$\s*([.\d,]+)'
+currencyRegex = r"'\$\s*([.\d,]+)'"
 
 configfile = 'config.json'
 imageDataFile = 'imageMetaData.json'
@@ -171,7 +171,7 @@ async def litigation_response(message):
     print(litigationState['state'])
     if litigationState['state'] == 'waitingForAmount':
         if message.author.id == litigationState['plaintiff']:
-            amount = re.findall(currencyRegex, message.content)
+            amount = re.findall(r"'\$\s*([.\d,]+)'", message.content)
             if len(amount) != 0:
                 print(amount[0])
                 litigationState['amount'] = amount[0]
