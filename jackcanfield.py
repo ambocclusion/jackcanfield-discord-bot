@@ -424,13 +424,14 @@ async def food_reviewer_pick(message):
                 'words'] + ' | matches: ' + str(selection['matches']) + ' | amount ' + str(
                 len(selections)) + '\nquery took : ' + query_time + ' seconds')
     except Exception as e:
+        print(e)
         await debug_log(traceback.format_exc())
 
 
 def get_all_playlist_items():
     url = config['playlistUrl']
     query = parse_qs(urlparse(url).query, keep_blank_values=True)
-    playlist_id = query['list'][0]
+    playlist_id = query[bytes('list')][0]
     print(f'get all playlist items links from {playlist_id}')
     youtube = googleapiclient.discovery.build('youtube', 'v3', developerKey=config['youtubeApiKey'])
 
@@ -558,7 +559,7 @@ async def send_quote(channel, text, user):
         else:
             await channel.send(file=discord_file)
     except Exception as e:
-        await channel.send('Unexpected error: ' + e)
+        await channel.send('Unexpected error: ' + str(e))
 
 
 async def send_message(channel):
@@ -639,12 +640,14 @@ async def on_message(message):
         scan_look = '!scan'
         if scan_look in message_content:
             force = False
-            if 'force' in message_content: force = True
+            if 'force' in message_content:
+                force = True
             asyncio.get_event_loop().create_task(scan_pictures(True, force))
         local_scan_look = '!localscan'
         if local_scan_look in message_content:
             force = False
-            if 'force' in message_content: force = True
+            if 'force' in message_content:
+                force = True
             asyncio.get_event_loop().create_task(scan_pictures(False, force))
         add_quote = '!addcopypasta'
         if add_quote in message_content:
@@ -658,7 +661,7 @@ async def on_message(message):
         if quote_text in message.content and message.mentions[0] == client.user and can_quote:
             asyncio.get_event_loop().create_task(send_quote(message.channel, message.content, message.author))
     except Exception as e:
-        await message.channel.send('Unexpected error: ' + e)
+        await message.channel.send('Unexpected error: ' + str(e))
 
 
 @tasks.loop(minutes=1)
