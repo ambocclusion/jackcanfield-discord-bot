@@ -82,13 +82,15 @@ async def end_giveaway(message):
     entries = []
 
     if len(reactions) == 0:
-        await giveawaymessage.reply('Nobody entered!')
+        await message.reply('Nobody entered!')
         return
 
     for r in reactions:
         async for u in r.users():
             if u.id not in entries:
                 entries.append(u.id)
+
+    await message.reply('There were ' + str(len(reactions)) + ' emojis and ' + str(len(entries)) + ' users entered')
 
     choice = random.choice(entries)
     message = message.content.split('!endgiveaway', 1)[1].strip().replace('{WINNER}', client.get_user(choice).mention)
