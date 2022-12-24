@@ -34,6 +34,7 @@ copyPastaData = {'copyPastas': []}
 foodReviewerBlacklistData = {'blacklist': []}
 litigationResponses = {'plaintiff': [], 'defendant': []}
 textResponses = {'responses': []}
+giveaway_data = {'messages': [], 'giveaway_message': 0}
 
 litigationState = {
     'inProgress': False,
@@ -57,10 +58,60 @@ copypastaFile = 'copypasta.json'
 blacklistFile = 'blacklist.json'
 litigationResponseFile = './media/litigation.json'
 textResponsesFile = 'textResponses.json'
+giveaway_file = 'giveaway.json'
 
 intents = discord.Intents.default()
 intents.members = True
 client = discord.Client(intents=intents)
+
+
+async def clear_giveaway(message):
+    giveaway_data['giveaway_message'] = 0
+    write_giveaway()
+    await message.reply('Giveaway cleared!')
+
+async def end_giveaway(message):
+    if giveaway_data['giveaway_message'] == 0:
+        await message.channel.send('There ain\'t no giveaway happening right now!')
+        return
+
+    channel = await client.fetch_channel(config['publicChannel'])
+    giveawaymessage = await channel.fetch_message(giveaway_data['giveaway_message'])
+    print(giveawaymessage.content)
+    reactions = giveawaymessage.reactions
+    entries = []
+
+    if len(reactions) == 0:
+        await giveawaymessage.reply('Nobody entered!')
+        return
+
+    for r in reactions:
+        async for u in r.users():
+            if u.id not in entries:
+                entries.append(u.id)
+
+    choice = random.choice(entries)
+    message = message.content.split('!endgiveaway', 1)[1].strip().replace('{WINNER}', client.get_user(choice).mention)
+    await channel.send(message)
+
+
+async def start_giveaway(message):
+    if giveaway_data['giveaway_message'] != 0:
+        await message.channel.send('There\'s already a giveaway happening! End the current one.')
+        return
+
+    item = message.content.split('!startgiveaway', 1)[1].strip()
+
+    if item.isspace() or len(item) == 0:
+        await message.channel.send('Send again with a message')
+        return
+
+    channel = client.get_channel(config['publicChannel'])
+    giveaway_data['item'] = item
+    giveaway_data['messages'] = []
+    giveawaymessage = await channel.send(item)
+    giveaway_data['giveaway_message'] = giveawaymessage.id
+    write_giveaway()
 
 
 async def gimme_brother(message):
@@ -574,6 +625,7 @@ async def send_message(channel):
     await channel.send(file=discord_file)
 
 
+
 @client.event
 async def on_message(message):
     if message.author == client.user:
@@ -655,6 +707,12 @@ async def on_message(message):
         blacklist_command = "blacklist this"
         if blacklist_command in message_content and message.reference is not None:
             await add_blacklist(message)
+        if '!endgiveaway' in message_content:
+            await end_giveaway(message)
+        if '!startgiveaway' in message_content:
+            await start_giveaway(message);
+        if '!cleargiveaway' in message_content:
+            await clear_giveaway(message)
     try:
         quote_text = 'quote'
         can_quote = 'mod mania' in role_ids or 'hot patron' in role_ids or 'twitch subscriber' in role_ids or 'nitro booster' in role_ids
@@ -726,6 +784,11 @@ def write_text_responses():
     with open(textResponsesFile, 'w') as j:
         j.write(new_data)
 
+def write_giveaway():
+    new_data = json.dumps(giveaway_data)
+    with open(giveaway_file, 'w') as j:
+        j.write(new_data)
+
 
 def load_file(path, default_obj):
     print(f'loading {path}')
@@ -737,7 +800,7 @@ def load_file(path, default_obj):
 
 
 def load_data():
-    global log, config, imageMetadata, foodReviewerBlacklistData, copyPastaData, litigationResponses, textResponses
+    global log, config, imageMetadata, foodReviewerBlacklistData, copyPastaData, litigationResponses, textResponses, giveaway_data
     log = load_file('log.json', {'logs': []})
     config = load_file(configfile, None)
     if config is None:
@@ -747,6 +810,7 @@ def load_data():
     copyPastaData = load_file(copypastaFile, {'copyPastas': []})
     litigationResponses = load_file(litigationResponseFile, {})
     textResponses = load_file(textResponsesFile, {'responses': []})
+    giveaway_data = load_file(giveaway_file, {'messages': [], 'giveaway_message': 0})
 
 
 if __name__ == "__main__":
