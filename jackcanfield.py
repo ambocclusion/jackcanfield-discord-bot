@@ -673,7 +673,7 @@ async def on_message(message):
             asyncio.get_event_loop().create_task(food_reviewer_pick(message))
 
     testing_role_ids = [role.name.lower() for role in message.author.roles]
-    if 'mod mania' in testing_role_ids:
+    if 'mod mania' in testing_role_ids or 'mediocre magistrates' in testing_role_ids:
         new_member_look = '!newmember'
         if new_member_look in message_content:
             print('new member test')
