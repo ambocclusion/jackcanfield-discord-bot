@@ -369,15 +369,12 @@ async def scan_image(filename):
     with wandImage(filename=filename) as image:
         image.crop(width=image.width, height=math.floor(image.height * 0.3), gravity='south')
         image.auto_level()
-        image.opaque_paint(target=Color('#FFFFFF'), fill=Color('black'), fuzz=image.quantum_range * 0.14, invert=True,
-                           channel='rgb')
+        image.opaque_paint(target=Color('#FFFFFF'), fill=Color('black'), fuzz=image.quantum_range * 0.14, invert=True, channel='rgb')
         image.negate(channel='rgb')
         pil_image = Image.open(io.BytesIO(image.make_blob('png')))
         parsed = pytesseract.image_to_string(pil_image, config=custom_oem_psm_config)
         parsed = re.sub(regex, '', parsed)
-        newparsed = ' '.join(w for w in nltk.wordpunct_tokenize(parsed.lower()) if ((w.lower() in words or w.lower() in
-                                                                                     brownwords) and len(
-            w.lower()) > 1))
+        newparsed = ' '.join(w for w in nltk.wordpunct_tokenize(parsed.lower()) if ((w.lower() in words or w.lower() in brownwords) and len(w.lower()) > 1))
         print(newparsed)
         return newparsed
 
@@ -386,17 +383,19 @@ async def scan_pictures(remote, force):
     await debug_log("scanning the screenshots, papi")
     channel = client.get_channel(config['pictureScanChannel'])
     latest_date = datetime.now() - timedelta(days=365 * 2)
+    startAmount = len(imageMetadata['datas'])
     if len(imageMetadata['datas']) != 0:
         latest = imageMetadata['datas'][-1]
         latest_date = parser.parse(latest['created_at'])
-    if remote is not True:
-        async for history in channel.history(after=latest_date, oldest_first=True, limit=100):
+    if remote is True:
+        async for history in channel.history(after=latest_date, oldest_first=True, limit=config['pictureScanAmount']):
             try:
                 print(history.attachments)
                 if len(history.attachments) != 0:
                     for attachment in history.attachments:
                         response = requests.get(attachment.url)
                         if response.status_code == 200:
+                            print(str(history.id))
                             filename = config['pictureDownloadFolder'] + '/' + str(history.id) + '.png'
                             with open(filename, 'w+b') as file:
                                 file.write(response.content)
@@ -408,10 +407,11 @@ async def scan_pictures(remote, force):
                             print(history)
                 write_metadata()
             except Exception as e:
-                print(e)
+                await debug_log(str(e))
             await asyncio.sleep(.1)
     if len(imageMetadata['datas']) == 0:
         raise Exception('No image metadata')
+    await debug_log("scanning metadata i got the magic touch _wheeze_")
     for idx, data in enumerate(imageMetadata['datas']):
         try:
             if force or 'words' not in imageMetadata['datas'][idx]:
@@ -422,6 +422,7 @@ async def scan_pictures(remote, force):
             print(e)
     print('finished scanning')
     await debug_log("done scanning my bruddas")
+    await debug_log("scanned " + str(len(imageMetadata['datas']) - startAmount) + " papis")
 
 
 async def food_reviewer_pick(message):
@@ -515,8 +516,8 @@ async def do_song_of_the_day(search=None):
         playlist_items = filtered_playlist
 
     random_video = random.choice(playlist_items)
-    await message_channel.send(
-        f'it\'s the hot dad song of the day!!! https://www.youtube.com/watch?v={random_video["snippet"]["resourceId"]["videoId"]}')
+    url = f'https://www.youtube.com/watch?v={random_video["snippet"]["resourceId"]["videoId"]}'
+    await message_channel.send(f'it\'s the hot dad song of the day!!! {url}')
 
 
 async def do_new_member(member_name):
@@ -726,12 +727,13 @@ async def on_message(message):
 
 @tasks.loop(minutes=1)
 async def call_on_loop():
-    if datetime.now().hour == 16 and datetime.now().minute == 20:
+    hour = datetime.now().hour
+    minute = datetime.now().minute
+    if hour == 16 and minute == 20:
         await do_song_of_the_day()
-    if datetime.now().hour == 3 and datetime.now().minute == 30:
-        asyncio.get_event_loop().create_task(scan_pictures(True, False))
-    if datetime.now().minute == 8 and (
-            datetime.now().hour == 0 or datetime.now().hour % config['copypastaQuoteRate'] == 0):
+    if hour == 3 and minute == 30:
+        scan_pictures(True, False)
+    if minute == 8 and (hour == 0 or hour % config['copypastaQuoteRate'] == 0):
         await post_copypasta(None)
 
 

@@ -24,6 +24,8 @@
 	"ultimateChannel":12345678901234567890,
 	"hotdadId":"12345678901234567890",
 
+	"pictureScanAmount": 100,
+
 	"pictureDownloadFolder": "downloads",
 	"foodReviewerChance": 0.75,
 	"detectionRate" : 0.85,
