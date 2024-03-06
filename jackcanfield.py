@@ -638,7 +638,7 @@ async def on_message(message):
 
     role_ids = [role.name.lower() for role in message.author.roles]
     elevated_user = 'mod mania' in role_ids or 'hot patron' in role_ids or 'twitch subscriber' in role_ids or \
-                    'nitro booster' in role_ids
+                    'nitro booster' in role_ids or 'mediocre magistrates' in role_ids or 'honorary degree from hot dad u' in role_ids
     if elevated_user is True:
         asyncio.get_event_loop().create_task(litigation_loop(message))
 
@@ -718,9 +718,10 @@ async def on_message(message):
             await clear_giveaway(message)
     try:
         quote_text = 'quote'
-        can_quote = 'mod mania' in role_ids or 'hot patron' in role_ids or 'twitch subscriber' in role_ids or 'nitro booster' in role_ids
+        can_quote = 'mod mania' in role_ids or 'hot patron' in role_ids or 'twitch subscriber' in role_ids or 'nitro booster' in role_ids or \
+                'nitro booster' in role_ids or 'mediocre magistrates' in role_ids or 'honorary degree from hot dad u' in role_ids
         if quote_text in message.content and message.mentions[0] == client.user and can_quote:
-            asyncio.get_event_loop().create_task(send_quote(message.channel, message.content, message.author))
+            await asyncio.get_event_loop().create_task(send_quote(message.channel, message.content, message.author))
     except Exception as e:
         await message.channel.send('Unexpected error: ' + str(e))
 
@@ -732,7 +733,7 @@ async def call_on_loop():
     if hour == 16 and minute == 20:
         await do_song_of_the_day()
     if hour == 3 and minute == 30:
-        scan_pictures(True, False)
+        await scan_pictures(True, False)
     if minute == 8 and (hour == 0 or hour % config['copypastaQuoteRate'] == 0):
         await post_copypasta(None)
 
