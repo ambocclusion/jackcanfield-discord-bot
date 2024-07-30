@@ -117,23 +117,9 @@ async def start_giveaway(message):
 
 
 async def gimme_brother(message):
-    image_pool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist']]
-    brothers = []
-    for image in image_pool:
-        try:
-            if 'brother' in image['words'] and 'my brother' not in image['words'] and 'for brother' not in \
-                    image['words']:
-                brothers.append(image)
-        except Exception as e:
-            continue
-
-    if len(brothers) == 0:
-        return
-    ran = random.choice(brothers)
-    filepath = config['pictureDownloadFolder'] + '/' + ran['id'] + '.png'
-    reviewer_pic = open(filepath, 'rb')
-    file = discord.File(fp=reviewer_pic)
-    await message.reply(file=file)
+    image_pool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist'] and 'words' in i and 'brother' in i['words'] and 'my brother' not in i['words'] and 'for brother' not in \
+                  i['words']]
+    await food_reviewer_pick(message, image_pool)
 
 
 async def search_term(message):
@@ -425,15 +411,20 @@ async def scan_pictures(remote, force):
     await debug_log("scanned " + str(len(imageMetadata['datas']) - startAmount) + " papis")
 
 
-async def food_reviewer_pick(message):
+async def food_reviewer_pick(message, datas = None):
     start_time = time.perf_counter()
+    if datas is None:
+        datas = imageMetadata['datas']
     try:
         matchlist = []
-        before, keyword, stringy = message.content.lower().partition('think')
+        if 'think' in message.content.lower():
+            before, keyword, stringy = message.content.lower().partition('think')
+        elif 'brother' in message.content.lower():
+            before, keyword, stringy = message.content.lower().partition('brother')
         stop_words = set(stopwords.words('english'))
         word_tokens = nltk.wordpunct_tokenize(stringy)
         filtered_sentence = set([w for w in word_tokens if not w.lower() in stop_words])
-        image_pool = [i for i in imageMetadata['datas'] if i['id'] not in foodReviewerBlacklistData['blacklist']]
+        image_pool = [i for i in datas if i['id'] not in foodReviewerBlacklistData['blacklist']]
         for image in image_pool:
             try:
                 matches = 0
@@ -459,6 +450,8 @@ async def food_reviewer_pick(message):
                               matchlist[-1]['matches']]
             else:
                 selections = [match for match in matchlist if not match['image']['words']]
+                if len(selections) == 0:
+                    selections = matchlist
             retry_counter = 0
             while retry_counter < 4:
                 try:
